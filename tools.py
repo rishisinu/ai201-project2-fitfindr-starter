@@ -82,13 +82,13 @@ def search_listings(
         if size is not None and size.lower() not in listing["size"].lower():
             continue
         listing_text = " ".join([
-    listing["title"],
-    listing["description"],
-    listing["category"],
-    listing["brand"],
-    " ".join(listing["style_tags"]),
-    " ".join(listing["colors"]),
-    ]).lower()
+            listing["title"],
+            listing["description"],
+            listing["category"],
+            listing["brand"] or "",
+            " ".join(listing["style_tags"]),
+            " ".join(listing["colors"]),
+        ]).lower()
         score = sum(1 for word in keywords if word in listing_text)
         if score > 0:
             filtered_dicts.append((score, listing))
@@ -137,19 +137,21 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
         )
     else:
         wardrobe_lines = "\n".join(
-        f"- {item['title']} ({item['category']}, {','.join(item['colors'])}, "
-        f"style: {','.join(item['style_tags'])}, size {item['size']})")
-        for item in items:
-            prompt = (
+            f"- {item['name']} ({item['category']}, {','.join(item['colors'])}, "
+            f"style: {','.join(item['style_tags'])})"
+            for item in items
+        )
+        prompt = (
             f"I'm considering buying this thrifted item:\n"
             f"- {new_item['title']} ({new_item['category']}, {', '.join(new_item['colors'])}, "
             f"style: {', '.join(new_item['style_tags'])})\n\n"
             f"My wardrobe includes:\n{wardrobe_lines}\n\n"
-            f"Suggest 1-2 complete outfits using the new item and specific pieces from my wardrobe.")
+            f"Suggest 1-2 complete outfits using the new item and specific pieces from my wardrobe."
+        )
         
 
     response = client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="openai/gpt-oss-120b",
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
@@ -186,26 +188,18 @@ def create_fit_card(outfit: str, new_item: dict) -> str:
     """
     if not outfit.strip():
         return "Error: Outfit description is empty. Please provide a valid outfit suggestion."
-    
-    description = outfit.get("description", "")
-    if not description.strip():
-        return "Error: Outfit description is empty. Please provide a valid outfit suggestion."
-    else:
-        prompt = (
-            f"Create a 2-4 sentence Instagram/TikTok caption for this thrifted item. The caption should not just be an outfit description but a humane caption capturing the vibe of the outfit :\n"
-            f"- {new_item['title']} (${new_item['price']}, {new_item['platform']})\n\n"
-            f"Outfit suggestion: {description}\n\n"
-            f"The caption should feel casual and authentic, mention the item name, price, and platform naturally, "
-            f"capture the outfit vibe in specific terms, and sound different each time for different inputs."
-        )
-        client = _get_groq_client()
-        response = client.chat.completions.create(
-            model="llama3-8b-8192",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.8,  # Higher temperature for more creative output
-        )
-        return response.choices[0].message.content
 
-
-
-    return ""
+    prompt = (
+        f"Create a 2-4 sentence Instagram/TikTok caption for this thrifted item. The caption should not just be an outfit description but a humane caption capturing the vibe of the outfit:\n"
+        f"- {new_item['title']} (${new_item['price']}, {new_item['platform']})\n\n"
+        f"Outfit suggestion: {outfit}\n\n"
+        f"The caption should feel casual and authentic, mention the item name, price, and platform naturally, "
+        f"capture the outfit vibe in specific terms, and sound different each time for different inputs."
+    )
+    client = _get_groq_client()
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-120b",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.8,
+    )
+    return response.choices[0].message.content
