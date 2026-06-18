@@ -126,10 +126,10 @@ https://mermaid.live/edit#pako:eNqNUtuO2jAQ_RXL-7JIbJo4kDRR1Rd2t12paquFvjQgZMjko
      before trusting it" is a plan. -->
 
 **Milestone 3 — Individual tool implementations:**
+     I will plan out the strucutre of the implementations, ask ai if there are any edge cases I should consider, and then implement each tool one by one, testing each tool against various inputs to ensure they meet the specifications outlined in the Tools section above.
      
 **Milestone 4 — Planning loop and state management:**
-
----
+     I will use the agent diagram and the specifications for each tool to implement the planning loop, ensuring that the state is properly managed and passed between tools. I will ask AI to review the implementation to check for any logical errors or edge cases I may have missed, and then test the full interaction flow with different user queries to ensure it works as expected.
 
 ## A Complete Interaction (Step by Step)
 
@@ -138,13 +138,23 @@ Write out what a full user interaction looks like from start to finish — tool 
 **Example user query:** "I'm looking for a vintage graphic tee under $30. I mostly wear baggy jeans and chunky sneakers. What's out there and how would I style it?"
 
 **Step 1:**
-<!-- What does the agent do first? Which tool is called? With what input? -->
+ The agent receives the user query and calls the `search_listings` tool with the appropriate parameters extracted from the query (description: "vintage graphic tee", size: "N/A", max_price: 30). The tool returns a list of matching items from the database.
 
 **Step 2:**
-<!-- What happens next? What was returned from step 1? What tool is called now? -->
+After the agent receives the list of matching items, it selects one item (e.g., a vintage graphic tee) and calls the `suggest_outfit` tool with the selected item and the user's existing wardrobe (baggy jeans and chunky sneakers). The tool returns a suggested outfit that incorporates the new item with the existing wardrobe.
 
 **Step 3:**
-<!-- Continue until the full interaction is complete -->
+Then the agent calls the `create_fit_card` tool with the suggested outfit and the new item. The tool returns a sharable description of the outfit.
 
 **Final output to user:**
-<!-- What does the user actually see at the end? -->
+Final output looks like this(example):
+
+Outfit: **Outfit 1 – “Y2K Cottage‑core Vibe”**  
+- **Top:** Y2K Baby Tee – Butterfly Print (white/pink/purple)  
+- **Bottom:** Wide‑leg khaki trousers (earth‑tone, minimal)  
+- **Outerwear:** Vintage black denim jacket (worn open for a relaxed contrast) 
+- **Shoes:** Chunky white sneakers (keeps the look fresh and street‑ready)  
+- **Accessories:** Brown leather belt (ties the khaki trousers together) + Black crossbody bag (keeps the outfit practical and sleek)  
+
+*Why it works:* The pastel‑bright butterfly tee gives the Y2K pop, while the loose khaki trousers soften the silhouette into a cottage‑core feel. The denim jacket adds a vintage edge, and the chunky sneakers keep the vibe youthful and comfortable.
+
